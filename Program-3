@@ -1,0 +1,57 @@
+def pour(from_cap, to_cap, target):
+    visited = set()
+
+    def dfs(from_jug, to_jug, steps):
+        # If we reach the target in either jug
+        if from_jug == target or to_jug == target:
+            steps.append((from_jug, to_jug))
+            return True
+
+        if (from_jug, to_jug) in visited:
+            return False
+        visited.add((from_jug, to_jug))
+        steps.append((from_jug, to_jug))
+
+        # Fill the first jug
+        if dfs(from_cap, to_jug, steps[:]):
+            print_path(steps)
+            return True
+        # Fill the second jug
+        if dfs(from_jug, to_cap, steps[:]):
+            print_path(steps)
+            return True
+        # Empty the first jug
+        if dfs(0, to_jug, steps[:]):
+            print_path(steps)
+            return True
+        # Empty the second jug
+        if dfs(from_jug, 0, steps[:]):
+            print_path(steps)
+            return True
+        # Pour from first jug to second
+        pour_amt = min(from_jug, to_cap - to_jug)
+        if dfs(from_jug - pour_amt, to_jug + pour_amt, steps[:]):
+            print_path(steps)
+            return True
+        # Pour from second jug to first
+        pour_amt = min(to_jug, from_cap - from_jug)
+        if dfs(from_jug + pour_amt, to_jug - pour_amt, steps[:]):
+            print_path(steps)
+            return True
+
+        return False
+
+    def print_path(path):
+        print("Solution:")
+        for s in path:
+            print(f"Jug1: {s[0]}L, Jug2: {s[1]}L")
+
+    if not dfs(0, 0, []):
+        print("No solution found.")
+
+# Example usage
+jug1_capacity = 4
+jug2_capacity = 3
+target = 2
+
+pour(jug1_capacity, jug2_capacity, target)
