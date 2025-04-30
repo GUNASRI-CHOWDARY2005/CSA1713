@@ -1,0 +1,57 @@
+from collections import deque
+
+def is_valid(state):
+    m1, c1, boat, m2, c2 = state
+    # Ensure numbers are within bounds
+    if any(x < 0 or x > 3 for x in [m1, c1, m2, c2]):
+        return False
+    # Check if missionaries are safe on both banks
+    if (m1 and m1 < c1) or (m2 and m2 < c2):
+        return False
+    return True
+
+def get_successors(state):
+    m1, c1, boat, m2, c2 = state
+    moves = [(1,0), (2,0), (0,1), (0,2), (1,1)]
+    successors = []
+
+    for m, c in moves:
+        if boat == 1:  # boat on original side
+            new_state = (m1 - m, c1 - c, 0, m2 + m, c2 + c)
+        else:  # boat on destination side
+            new_state = (m1 + m, c1 + c, 1, m2 - m, c2 - c)
+        if is_valid(new_state):
+            successors.append(new_state)
+
+    return successors
+
+def bfs():
+    initial_state = (3, 3, 1, 0, 0)  # (M1, C1, boat, M2, C2)
+    goal_state = (0, 0, 0, 3, 3)
+    visited = set()
+    queue = deque()
+    queue.append((initial_state, [initial_state]))
+
+    while queue:
+        state, path = queue.popleft()
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if state == goal_state:
+            return path
+
+        for successor in get_successors(state):
+            queue.append((successor, path + [successor]))
+
+    return None
+
+# Run and print the solution
+solution = bfs()
+if solution:
+    print("Steps to solve Missionaries and Cannibals:")
+    for step in solution:
+        print(f"Left: M={step[0]}, C={step[1]} | Right: M={step[3]}, C={step[4]} | Boat on {'Left' if step[2]==1 else 'Right'}")
+else:
+    print("No solution found.")
+
