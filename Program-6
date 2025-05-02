@@ -1,0 +1,52 @@
+# Vacuum Cleaner Problem (Simple Reflex Agent)
+
+import random
+
+# Define the Environment
+class Environment:
+    def __init__(self):
+        self.locations = {
+            "A": random.choice(["Clean", "Dirty"]),
+            "B": random.choice(["Clean", "Dirty"])
+        }
+        self.agent_location = random.choice(["A", "B"])
+        self.score = 0
+
+    def is_dirty(self):
+        return self.locations[self.agent_location] == "Dirty"
+
+    def clean(self):
+        if self.is_dirty():
+            self.locations[self.agent_location] = "Clean"
+            self.score += 1
+            print(f"Cleaned {self.agent_location}")
+        else:
+            print(f"{self.agent_location} is already clean.")
+
+    def move(self):
+        if self.agent_location == "A":
+            self.agent_location = "B"
+        else:
+            self.agent_location = "A"
+        self.score -= 1  # Movement cost
+        print(f"Moved to {self.agent_location}")
+
+    def status(self):
+        print(f"Location: {self.agent_location}, Status: {self.locations[self.agent_location]}")
+        print(f"Current Environment: {self.locations}")
+        print(f"Score: {self.score}")
+
+# Simple Reflex Agent
+def vacuum_agent(env: Environment):
+    for _ in range(1):  # Run for a few steps
+        env.status()
+        if env.is_dirty():
+            env.clean()
+        else:
+            env.move()
+    print("Final Environment State:")
+    env.status()
+
+# Run the simulation
+env = Environment()
+vacuum_agent(env)
