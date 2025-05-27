@@ -1,0 +1,53 @@
+import heapq
+
+class Node:
+    def __init__(self, path, cost, estimate):
+        self.path = path            # Path so far
+        self.cost = cost            # g(n): cost so far
+        self.estimate = estimate    # f(n): g(n) + h(n)
+
+    def __lt__(self, other):
+        return self.estimate < other.estimate
+
+def heuristic(path, graph, n):
+    # Simple heuristic: minimum edge from current city + MST (optional)
+    unvisited = set(range(n)) - set(path)
+    if not unvisited:
+        return graph[path[-1]][path[0]]  # Cost to return to start
+
+    # Use minimum edge to estimate cost to next node
+    min_edge = min(graph[path[-1]][j] for j in unvisited)
+    return min_edge
+
+def astar_tsp(graph):
+    n = len(graph)
+    start = Node(path=[0], cost=0, estimate=0)
+    pq = []
+    heapq.heappush(pq, start)
+
+    while pq:
+        current = heapq.heappop(pq)
+        if len(current.path) == n:
+            total_cost = current.cost + graph[current.path[-1]][0]
+            return total_cost, current.path + [0]
+
+        for i in range(n):
+            if i not in current.path:
+                g = current.cost + graph[current.path[-1]][i]
+                h = heuristic(current.path + [i], graph, n)
+                f = g + h
+                heapq.heappush(pq, Node(current.path + [i], g, f))
+
+    return None
+
+# Example usage
+graph = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+cost, path = astar_tsp(graph)
+print("Minimum cost:", cost)
+print("Path:", path)
