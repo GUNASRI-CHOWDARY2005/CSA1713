@@ -1,0 +1,67 @@
+from itertools import combinations
+import sys
+
+def tsp(graph):
+    n = len(graph)
+    # memo[subset][i] = min cost to reach city i with visited set = subset
+    memo = {}
+
+    # Initialize base cases: start from city 0
+    for k in range(1, n):
+        memo[(1 << k, k)] = (graph[0][k], 0)
+
+    # Loop through subsets of increasing length
+    for subset_size in range(2, n):
+        for subset in combinations(range(1, n), subset_size):
+            bits = 0
+            for bit in subset:
+                bits |= 1 << bit
+
+            for k in subset:
+                prev_bits = bits & ~(1 << k)
+                min_dist = sys.maxsize
+                min_prev = None
+                for m in subset:
+                    if m == k:
+                        continue
+                    if (prev_bits, m) in memo:
+                        dist = memo[(prev_bits, m)][0] + graph[m][k]
+                        if dist < min_dist:
+                            min_dist = dist
+                            min_prev = m
+                memo[(bits, k)] = (min_dist, min_prev)
+
+    # Close the tour by returning to starting point
+    bits = (2 ** n - 1) - 1  # All cities visited except 0
+    min_cost = sys.maxsize
+    last_city = -1
+    for k in range(1, n):
+        cost = memo[(bits, k)][0] + graph[k][0]
+        if cost < min_cost:
+            min_cost = cost
+            last_city = k
+
+    # Reconstruct the path
+    path = [0]
+    bits = (2 ** n - 1) - 1
+    city = last_city
+    for i in range(n - 1):
+        path.append(city)
+        _, prev_city = memo[(bits, city)]
+        bits &= ~(1 << city)
+        city = prev_city
+    path.append(0)  # Return to start
+
+    return min_cost, path
+
+# Example usage
+graph = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+cost, path = tsp(graph)
+print("Minimum cost:", cost)
+print("Path:", path)
